@@ -87,10 +87,12 @@ void loop() {
 				refresh();
 				wrefresh(boardwin);
 				break;
+			version (go) {
 			case 'n':
 				if (g.pass() == 1 && doScoreThing())
 					return;
 				break;
+			}
 			case 'q':
 				break buh;
 		}
