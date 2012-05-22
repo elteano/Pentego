@@ -206,8 +206,8 @@ void setup_color() {
 		init_pair(Colors.PLAYER_TWO, COLOR_RED, COLOR_BLACK);
 	}
 	version (go) {
-		init_pair(Colors.COLOR_DEFAULT, COLOR_YELLOW, COLOR_BLUE);
-		init_pair(Colors.PLAYER_ONE, COLOR_WHITE, COLOR_BLUE);
-		init_pair(Colors.PLAYER_TWO, COLOR_BLACK, COLOR_BLUE);
+		init_pair(Colors.COLOR_DEFAULT, COLOR_YELLOW, COLOR_RED);
+		init_pair(Colors.PLAYER_ONE, COLOR_BLACK, COLOR_RED);
+		init_pair(Colors.PLAYER_TWO, COLOR_WHITE, COLOR_RED);
 	}
 }

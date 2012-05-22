@@ -65,22 +65,27 @@ public class Game {
 		//Don't allow pieces to be placed over pieces
 		if (board.getPiece(x, y) != Piece.NONE)
 			return;
-		board.setPiece(x, y, p[curPlayer].color);
-		version(go) {
-			//Guilty until proven innocent here.
-			bool suicidePlay = true;
-			//Search through the borders to see if one makes this play valid.
-			foreach (pair; board.getBorderPieces(x, y)) {
-				if (board.getPiece(pair[0], pair[1]) == Piece.NONE) {
-					suicidePlay = false;	//INNOCENT!
-					break;	//No point searching any more
+		version (go) {
+			if (board.getContiguousPieces(x, y).length > 1) {
+				ulong[2][] border = board.getBorderPieces(x, y);
+				if (border.length > 1) {
+					Piece type = board.getPiece(border[0][0], border[0][1]);
+						if (type != Piece.NONE && type != p[curPlayer].color) {
+						bool allSame = true;
+						for (int i = 1; i < border.length; i++) {
+							if (type != board.getPiece(border[i][0], border[i][1])) {
+								allSame = false;
+								break;
+							}
+						}
+						if (allSame)
+							return;	//Cannot play inside another player's territory
+					}
 				}
 			}
-			if (suicidePlay) {
-				//Reset the piece and make them play somewhere else.
-				board.setPiece(x, y, Piece.NONE);
-				return;
-			}
+		}
+		board.setPiece(x, y, p[curPlayer].color);
+		version(go) {
 			//See if opponent pieces have been surrounded
 			for (Dir d = Dir.min; d <= Dir.max; d += 2) {
 				long mx = x;
@@ -105,6 +110,20 @@ public class Game {
 						}
 					}
 				}
+			}
+			//Guilty until proven innocent here.
+			bool suicidePlay = true;
+			//Search through the borders to see if one makes this play valid.
+			foreach (pair; board.getBorderPieces(x, y)) {
+				if (board.getPiece(pair[0], pair[1]) == Piece.NONE) {
+					suicidePlay = false;	//INNOCENT!
+					break;	//No point searching any more
+				}
+			}
+			if (suicidePlay) {
+				//Reset the piece and make them play somewhere else.
+				board.setPiece(x, y, Piece.NONE);
+				return;
 			}
 		}
 		version(pente) {
@@ -178,11 +197,11 @@ public class Game {
 					}
 					//Give credit where it is due
 					if (same) {
-						if (same == Piece.BLACK && !board.retContains(p0field, x, y)) {
+						if (first == Piece.BLACK && !board.retContains(p0field, x, y)) {
 							p0field ~= board.getContiguousPieces(x, y);
 							continue;
 						}
-						if (same == Piece.WHITE && !board.retContains(p1field, x, y)) {
+						if (first == Piece.WHITE && !board.retContains(p1field, x, y)) {
 							p1field ~= board.getContiguousPieces(x, y);
 							continue;
 						}
