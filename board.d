@@ -85,7 +85,7 @@ class Board {
 		pieces[x][y] = piece;
 	}
 
-  //returns: The width of this board.
+  ///returns: The width of this board.
 	@safe ulong getWidth() {
 		return pieces[0].length;
 	}
@@ -145,7 +145,7 @@ class Board {
 		}
 	}
 
-	///Modifies the pieces in the given direction so that they 
+	///Modifies the pieces in the given direction indefinitely.
 	@safe void setPieceInDir(long x, long y, Dir d, in Piece[] set) {
 		long wx = x;
 		long wy = y;
@@ -182,7 +182,24 @@ class Board {
 		ulong[2][] ret = new ulong[2][0];
 		if (outOfBounds(startx, starty)) return ret;
 		Piece type = getPiece(startx, starty);
-		continueContiguousPieces(ret, x, y, type);
+		continueContiguousPieces(ret, startx, starty, type);
+		return ret;
+	}
+
+	///returns:  Array containing coordinate pairs of all border pieces.
+	@safe ulong[2][] getBorderPieces(ulong startx, ulong starty) {
+		Piece type = getPiece(startx, starty);
+		ulong[2][] field = getContiguousPieces(startx, starty);
+		ulong[2][] ret = new ulong[2][0];
+		foreach (pair; field) {
+			for (Dir d = Dir.min; d <= Dir.max; d += 2) {
+				long x = pair[0];
+				long y = pair[1];
+				modifyLocInDir(x, y, d);
+				if (!outOfBounds(x,y) && getPiece(x,y) != type && !retContains(ret, x, y))
+					ret ~= [x, y];
+			}
+		}
 		return ret;
 	}
 
@@ -193,7 +210,7 @@ class Board {
 			bleorgh[bleorgh.length-1][1] = y;
 		}
 		version(all)
-	³²±		bleorgh ~= [startx, starty];
+			bleorgh ~= [startx, starty];
 		for (Dir d = Dir.min; d <= Dir.max; d += 2) {
 			long x = startx;
 			long y = starty;

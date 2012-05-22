@@ -1,11 +1,12 @@
 import game;
-import std.stdio;
 import ncs.ncurses;
+import std.stdio;
 
 private:
 WINDOW *capwin;
 WINDOW *boardwin;
 int ROWS, COLUMNS;
+bool endLoop = false;	//When this is true, the function loop() exits.
 Game g;
 public:
 //immutable keyword is similar to 'final' in Java
@@ -59,7 +60,7 @@ void loop() {
 	refresh();
 	wrefresh(boardwin);
 	buh:
-	for (;;) {
+	while(!endLoop) {
 		int ch = getch();
 		int x, y;
 		getyx(boardwin, y, x);
@@ -86,6 +87,10 @@ void loop() {
 				refresh();
 				wrefresh(boardwin);
 				break;
+			case 'n':
+				if (g.pass() == 1 && doScoreThing())
+					return;
+				break;
 			case 'q':
 				break buh;
 		}
@@ -93,15 +98,26 @@ void loop() {
 		refresh();
 		wrefresh(boardwin);
 		version (pente) {
-			int v = g.getVictor();
-			if (v >= 0) {
-				attron(COLOR_PAIR(v+1));
-				printw("Player %d wins!", v);
-				getch();
+			if (doScoreThing())
 				return;
-			}
 		}
 	}
+}
+
+bool doScoreThing() {
+	int v = g.getVictor();
+	if (v >= 0) {
+		attron(COLOR_PAIR(v+1));
+		printw("Player %d wins!", v);
+		getch();
+		return true;
+	}
+	else if (v == -3) {
+		printw("The game is tied!");
+		getch();
+		return true;
+	}
+	return false;
 }
 
 void updateScores() {
@@ -128,9 +144,13 @@ void updateScores() {
 	mvwprintw(capwin, 7, 0, "%d", g.getPlayer(1).caps);
 	wattroff(capwin, COLOR_PAIR(Colors.PLAYER_TWO));
 	wattron(capwin, COLOR_PAIR(g.getCurrentPlayer()+1));
-	wmove(capwin, 9, 0);
-	wprintw(capwin, "%d", bx);
-	mvwprintw(capwin, 10, 0, "%d", by);
+	debug {
+		mvwprintw(capwin, 9, 0, "%d", bx);
+		mvwprintw(capwin, 10, 0, "%d", by);
+		wmove(capwin, 11, 0);
+		wprintw(capwin, "%d", g.getBoard().getContiguousPieces(0, 0).length);
+		mvwprintw(capwin, 12, 0, "%d", g.getBoard().getBorderPieces(0, 0).length);
+	}
 	wrefresh(capwin);
 	wrefresh(boardwin);
 }
