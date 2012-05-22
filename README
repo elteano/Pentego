@@ -1,0 +1,10 @@
+Hello!  This is a little conglomeration of the games
+Pente and Go, combined using conditional compilation
+instead of something sensible and extensible.
+Everything is written in D.  In order to compile Pente,
+simply compile it with version string of 'pente'; Go is
+'go'.  I compile with GDC, so I use the command
+gdc -fversion=pente -lncurses -o pente
+Replacing 'pente' with 'go' as the need may be.  The
+specifics of the commands are different for other
+compilers; look up the documentation if you need to.
